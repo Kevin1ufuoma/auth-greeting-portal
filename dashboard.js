@@ -14,7 +14,7 @@ const FEMALE_GREETINGS = [
 ];
 
 // Backend API Endpoint
-const BACKEND_URL = 'https://log-form-greetingqwenai-app.streamlit.app/';
+const BACKEND_URL = 'https://auth-greeting-backend.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
     // ==========================================

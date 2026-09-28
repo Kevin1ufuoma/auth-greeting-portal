@@ -11,7 +11,7 @@ const registerForm = document.getElementById('register-form');
 const loginForm = document.getElementById('login-form');
 
 // Local Backend Server Endpoint
-const BACKEND_URL = 'https://log-form-greetingqwenai-app.streamlit.app/';
+const BACKEND_URL = 'https://auth-greeting-backend.onrender.com';
 
 // ==========================================
 // 2. UI SLIDING ANIMATIONS
