@@ -11,7 +11,7 @@ const registerForm = document.getElementById('register-form');
 const loginForm = document.getElementById('login-form');
 
 // Local Backend Server Endpoint
-const BACKEND_URL = 'http://127.0.0.1:5000';
+const BACKEND_URL = 'https://YOUR_STREAMLIT_APP_NAME.streamlit.app';
 
 // ==========================================
 // 2. UI SLIDING ANIMATIONS
