@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Welcome</title>
+    <!-- We reuse your existing styles as the foundation -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Extra styling specific to dashboard layout alignment -->
+    <style>
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            width: 90%;
+            max-width: 900px;
+            margin-top: 100px;
+            gap: 20px;
+            z-index: 1;
+        }
+        .welcome-card {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, .5);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+            padding: 30px;
+            text-align: center;
+            color: #fff;
+        }
+        .welcome-card h1 {
+            font-size: 2.5em;
+            color: #162938;
+            margin-bottom: 10px;
+        }
+        .welcome-card p {
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .panel {
+            background: rgba(22, 41, 56, 0.2);
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            padding: 20px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel h3 {
+            color: #162938;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(22, 41, 56, 0.3);
+            padding-bottom: 5px;
+        }
+        /* Chatbox styles */
+        .chat-messages {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: rgba(0,0,0,0.2);
+        }
+        .chat-input-row {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input-row input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #162938;
+            outline: none;
+        }
+        /* Feedback styles */
+        .feedback-form textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #162938;
+            resize: none;
+            outline: none;
+            margin-bottom: 10px;
+        }
+        .comment-history {
+            height: 110px;
+            overflow-y: auto;
+            margin-top: 10px;
+            font-size: 0.9em;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 10px;
+        }
+        .comment-item {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        @media (max-width: 768px) {
+            .grid-layout { grid-template-columns: 1fr; }
+            .dashboard-container { margin-top: 140px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2 class="logo">PORTFOLIO</h2>
+        <nav class="navigation">
+            <a href="#" id="logout-btn" class="btnLogin-popup" style="display: flex; align-items: center; justify-content: center;">Logout</a>
+        </nav>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- DYNAMIC GREETING CARD -->
+        <div class="welcome-card">
+            <h1 id="greeting-title">Hello!</h1>
+            <p id="greeting-message">Loading your personalized welcome...</p>
+        </div>
+
+        <div class="grid-layout">
+            <!-- LEFT PANEL: FORM SPREE FEEDBACK + SUPABASE COMMENT HISTORY -->
+            <div class="panel">
+                <h3>Project Feedback</h3>
+                <!-- Replace 'YOUR_FORMSPREE_ID' later with your actual Formspree endpoint ID string -->
+                <form id="feedback-form" class="feedback-form" action="https://formspree.io/f/xkodozvk" method="POST">
+                    <textarea name="message" id="feedback-text" placeholder="How do you feel about this project?" required></textarea>
+                    <button type="submit" class="btn">Save & Send</button>
+                </form>
+                
+                <div class="comment-history" id="comment-history-box">
+                    <strong>Comment History:</strong>
+                    <div id="comments-wrapper">Loading history...</div>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: INTELLIGENT AI AGENT CHATBOX -->
+            <div class="panel">
+                <h3>AI Assistant (Qwen-2.5)</h3>
+                <div class="chat-messages" id="chat-box">
+                    <div style="color: #94a3b8; font-style: italic;">Ask the project intelligence engine anything...</div>
+                </div>
+                <div class="chat-input-row">
+                    <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+                    <button id="chat-send-btn" class="btn" style="width: 80px; height: auto;">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wire in dashboard controller -->
+    <script src="dashboard.js"></script>
+</body>
+</html>

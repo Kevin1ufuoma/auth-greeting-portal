@@ -1,0 +1,12 @@
+# Hide local secure keys configuration registry
+.env
+
+# Hide Python virtual environments and package cache metadata layers
+__pycache__/
+*.pyc
+venv/
+.venv
+
+# Hide local system tracking files
+.DS_Store
+Thumbs.db
