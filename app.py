@@ -174,10 +174,8 @@ def chat_with_ai():
 
 
 if __name__ == '__main__':
-    app.run(
-        debug=False,       # Turn debug OFF in cloud environments to prevent crashing
-        port=5000, 
-        host='0.0.0.0',   # Allows Streamlit's network proxy network layer to see the app
-        use_reloader=False # Stops Flask from starting a second background thread tracker
-    )
+    # Render passes an environment variable called 'PORT'. We read it natively.
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
+
 
