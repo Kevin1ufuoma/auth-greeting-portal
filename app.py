@@ -154,7 +154,7 @@ def chat_with_ai():
         full_payload_messages = [system_prompt] + conversation_history
 
         payload = {
-            "model": "llama-3.3-70b-versatile", # Highly up-to-date flagship model on Groq
+            "model": "llama-3.3-70b-specdec", # Highly up-to-date flagship model on Groq
             "messages": full_payload_messages,
             "temperature": 0.6
         }
