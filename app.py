@@ -174,5 +174,10 @@ def chat_with_ai():
 
 
 if __name__ == '__main__':
-    # Start server locally on port 5000
-    app.run(debug=True, port=5000)
+    app.run(
+        debug=False,       # Turn debug OFF in cloud environments to prevent crashing
+        port=5000, 
+        host='0.0.0.0',   # Allows Streamlit's network proxy network layer to see the app
+        use_reloader=False # Stops Flask from starting a second background thread tracker
+    )
+
