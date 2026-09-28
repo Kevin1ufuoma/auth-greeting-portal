@@ -14,7 +14,7 @@ const FEMALE_GREETINGS = [
 ];
 
 // Backend API Endpoint
-const BACKEND_URL = 'https://YOUR_STREAMLIT_APP_NAME.streamlit.app';
+const BACKEND_URL = 'https://log-form-greetingqwenai-app.streamlit.app/';
 
 document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
