@@ -118,10 +118,15 @@ def chat_with_ai():
         if not data:
             return jsonify({"error": "No payload data received"}), 400
             
-        # Capture the whole conversation array from the frontend
+       # Capture the whole conversation array from the frontend
         conversation_history = data.get('messages', [])
-        if not conversation_history:
-            return jsonify({"error": "Conversation history cannot be blank"}), 400
+        if not conversation_history or len(conversation_history) == 0:
+            return jsonify({"error": "Conversation history cannot be empty"}), 400
+        
+        # Validate that the latest incoming user message actually contains text
+        latest_user_message = conversation_history[-1].get('content', '').strip()
+        if not latest_user_message:
+            return jsonify({"error": "Message text space cannot be blank"}), 400
         
         groq_api_key = os.getenv("GROQ_API_KEY")
         if not groq_api_key:
