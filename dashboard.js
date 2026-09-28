@@ -145,28 +145,21 @@ const chatInput = document.getElementById('chat-input');
 const chatSendBtn = document.getElementById('chat-send-btn');
 const chatBox = document.getElementById('chat-box');
 
-// 🤖 CUSTOM VISUAL NAME: Update this to match the name you picked in app.py
 const AI_VISUAL_NAME = "Nova AI"; 
-
-// Initialize chat memory array
-let chatMemory = [];
+let chatMemory = []; // Make sure this sits OUTSIDE your function at the top of the chat area
 
 async function sendChatMessage() {
     const userText = chatInput.value.trim();
     if (!userText) return; 
 
-    // 1. Append user message to visual UI screen
+    // 1. Display user text on screen
     chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #fff;"><strong>You:</strong> ${userText}</div>`;
     chatInput.value = ''; 
     chatBox.scrollTop = chatBox.scrollHeight; 
 
-    // 2. Push user message into running memory array
+    // 2. Save USER input to history array
     chatMemory.push({ role: "user", content: userText });
 
-    // Enforce a memory limit so the payload doesn't get infinitely massive (keeps last 10 messages)
-    if (chatMemory.length > 10) chatMemory.shift();
-
-    // Placeholder loading frame
     const loadingId = 'ai-loading-' + Date.now();
     chatBox.innerHTML += `<div id="${loadingId}" style="margin-bottom: 10px; color: #94a3b8; font-style: italic;">${AI_VISUAL_NAME} is typing...</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -175,24 +168,23 @@ async function sendChatMessage() {
         const response = await fetch(`${BACKEND_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: chatMemory }) // Send entire memory array!
+            body: JSON.stringify({ messages: chatMemory }) // Sending full history arrays
         });
         const data = await response.json();
 
         document.getElementById(loadingId).remove();
 
         if (response.ok) {
-            // 3. Push AI response into running memory array so it remembers next time
+            // 3. Save ASSISTANT response to history array so it knows next time!
             chatMemory.push({ role: "assistant", content: data.reply });
             
-            // Append AI response bubble to UI screen
             chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #60a5fa;"><strong>${AI_VISUAL_NAME}:</strong> ${data.reply}</div>`;
         } else {
             chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #ef4444;"><strong>Error:</strong> ${data.error}</div>`;
         }
     } catch (error) {
         document.getElementById(loadingId).remove();
-        chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #ef4444;"><strong>Error:</strong> Cannot link to AI engine right now.</div>`;
+        chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #ef4444;"><strong>Error:</strong> Connection dropped.</div>`;
     }
     chatBox.scrollTop = chatBox.scrollHeight;
 }
