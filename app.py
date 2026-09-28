@@ -118,60 +118,58 @@ def chat_with_ai():
         if not data:
             return jsonify({"error": "No payload data received"}), 400
             
-        user_message = data.get('message')
-        if not user_message:
-            return jsonify({"error": "Message text space cannot be blank"}), 400
+        # Capture the whole conversation array from the frontend
+        conversation_history = data.get('messages', [])
+        if not conversation_history:
+            return jsonify({"error": "Conversation history cannot be blank"}), 400
         
-        # Pull your hidden Groq API key safely from your local .env file
         groq_api_key = os.getenv("GROQ_API_KEY")
         if not groq_api_key:
-            return jsonify({"error": "Groq API key configuration missing on backend environment registry"}), 500
+            return jsonify({"error": "Groq API key configuration missing"}), 500
 
-        # Fetch the exact current live date from your server machine
         current_time_str = datetime.now().strftime("%A, %B %d, %Y")
 
-        # Secure endpoints targeting Groq's low-latency compilation pipeline
-        url = "https://api.groq.com/openai/v1/chat/completions"
+        url = "https://groq.com"
         headers = {
             "Authorization": f"Bearer {groq_api_key}",
             "Content-Type": "application/json"
         }
         
-        # Using a reliable flagship dense model tracking variable string (qwen/qwen3.8-27b)
-        payload = {
-            "model": "qwen/qwen3.8-27b", 
-            "messages": [
-                {
-                    "role": "system", 
-                    "content": "You are a professional, polite portfolio AI assistant. Keep responses punchy, concise, and focused on helping the user."
-                },
-                {"role": "user", "content": user_message}
-            ],
-            "temperature": 0.7
+        ai_name = "Pleasure" 
+        
+        # Build system instructions to force its name, date awareness, and current world context
+        system_prompt = {
+            "role": "system", 
+            "content": f"Your name is {ai_name}. You are an advanced, polite portfolio AI assistant built by an exceptional developer. "
+                       f"Today's exact date is {current_time_str}. You are fully up-to-date with current world events. "
+                       f"Keep responses punchy, concise, and friendly."
         }
 
-        # Fire connection request cleanly
+        # Combine system prompt with the full incoming chat history for continuity
+        full_payload_messages = [system_prompt] + conversation_history
+
+        payload = {
+            "model": "llama-3.3-70b-versatile", # Highly up-to-date flagship model on Groq
+            "messages": full_payload_messages,
+            "temperature": 0.6
+        }
+
         response = requests.post(url, headers=headers, json=payload, timeout=10)
         
-        # Robust Guard: Catch non-JSON HTML/Text block configurations before attempting parsing actions
         try:
             response_data = response.json()
         except Exception:
-            return jsonify({
-                "error": f"Groq engine returned a non-JSON raw body format signature. Status Code: {response.status_code}. Raw content: {response.text[:100]}"
-            }), 500
+            return jsonify({"error": "Groq engine returned a non-JSON format structure."}), 500
 
         if response.status_code == 200:
-            ai_reply = response_data['choices'][0]['message']['content']
+            ai_reply = response_data['choices']['message']['content']
             return jsonify({"reply": ai_reply}), 200
         else:
-            error_msg = response_data.get('error', {}).get('message', 'Unknown api communication failure protocol trigger')
-            return jsonify({"error": f"Groq Error ({response.status_code}): {error_msg}"}), response.status_code
+            error_msg = response_data.get('error', {}).get('message', 'Unknown communication failure')
+            return jsonify({"error": f"Groq Error: {error_msg}"}), response.status_code
 
     except Exception as e:
-        print(f"CRITICAL SYSTEM EXCEPTION TRACEBACK: {str(e)}")
         return jsonify({"error": f"Internal Application Exception Error: {str(e)}"}), 500
-
 
 if __name__ == '__main__':
     # Render passes an environment variable called 'PORT'. We read it natively.

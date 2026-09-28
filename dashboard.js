@@ -139,40 +139,54 @@ async function loadCommentHistory() {
 }
 
 // ==========================================
-// 7. CHATBOX CONTROLLER LOGIC (QWEN AI)
+// 7. CHATBOX CONTROLLER LOGIC (WITH CONTINUITY)
 // ==========================================
 const chatInput = document.getElementById('chat-input');
 const chatSendBtn = document.getElementById('chat-send-btn');
 const chatBox = document.getElementById('chat-box');
 
+// 🤖 CUSTOM VISUAL NAME: Update this to match the name you picked in app.py
+const AI_VISUAL_NAME = "Nova AI"; 
+
+// Initialize chat memory array
+let chatMemory = [];
+
 async function sendChatMessage() {
-    const message = chatInput.value.trim();
-    if (!message) return; // Ignore blank spaces
+    const userText = chatInput.value.trim();
+    if (!userText) return; 
 
-    // Append the User's typed comment message into the dashboard chat interface bubble row
-    chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #fff;"><strong>You:</strong> ${message}</div>`;
-    chatInput.value = ''; // Reset input area
-    chatBox.scrollTop = chatBox.scrollHeight; // Scroll view to the bottom instantly
+    // 1. Append user message to visual UI screen
+    chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #fff;"><strong>You:</strong> ${userText}</div>`;
+    chatInput.value = ''; 
+    chatBox.scrollTop = chatBox.scrollHeight; 
 
-    // Placeholder loading frame indicator
+    // 2. Push user message into running memory array
+    chatMemory.push({ role: "user", content: userText });
+
+    // Enforce a memory limit so the payload doesn't get infinitely massive (keeps last 10 messages)
+    if (chatMemory.length > 10) chatMemory.shift();
+
+    // Placeholder loading frame
     const loadingId = 'ai-loading-' + Date.now();
-    chatBox.innerHTML += `<div id="${loadingId}" style="margin-bottom: 10px; color: #94a3b8; font-style: italic;">AI is thinking...</div>`;
+    chatBox.innerHTML += `<div id="${loadingId}" style="margin-bottom: 10px; color: #94a3b8; font-style: italic;">${AI_VISUAL_NAME} is typing...</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
         const response = await fetch(`${BACKEND_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({ messages: chatMemory }) // Send entire memory array!
         });
         const data = await response.json();
 
-        // Clear out loading text line marker block
         document.getElementById(loadingId).remove();
 
         if (response.ok) {
-            // Append clean, interactive AI agent return answer
-            chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #60a5fa;"><strong>Qwen AI:</strong> ${data.reply}</div>`;
+            // 3. Push AI response into running memory array so it remembers next time
+            chatMemory.push({ role: "assistant", content: data.reply });
+            
+            // Append AI response bubble to UI screen
+            chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #60a5fa;"><strong>${AI_VISUAL_NAME}:</strong> ${data.reply}</div>`;
         } else {
             chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #ef4444;"><strong>Error:</strong> ${data.error}</div>`;
         }
@@ -183,12 +197,7 @@ async function sendChatMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Trigger text shipping actions via physical mouse click hooks
 chatSendBtn.addEventListener('click', sendChatMessage);
-
-// Trigger text shipping actions seamlessly via physical keyboard 'Enter' press events
 chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        sendChatMessage();
-    }
+    if (e.key === 'Enter') sendChatMessage();
 });
