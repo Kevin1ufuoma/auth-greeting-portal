@@ -165,11 +165,13 @@ async function sendChatMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: chatMemory }) // Sending full history arrays
-        });
+        // Ensure there is a clean slash before api/chat
+const response = await fetch(`${BACKEND_URL}/api/chat`, {
+    method: 'POST', // Make sure this is 100% capitalized POST string
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: chatMemory })
+});
+
         const data = await response.json();
 
         document.getElementById(loadingId).remove();

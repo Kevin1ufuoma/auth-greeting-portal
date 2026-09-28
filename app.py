@@ -111,7 +111,8 @@ def get_feedback():
 
 import requests # Make sure 'import requests' is added at the top of your app.py file
 
-@app.route('/api/chat', methods=['POST'])
+# 🚀 FIX: Add strict_slashes=False so both /api/chat and /api/chat/ work perfectly
+@app.route('/api/chat', methods=['POST'], strict_slashes=False)
 def chat_with_ai():
     try:
         data = request.json
@@ -119,61 +120,58 @@ def chat_with_ai():
             return jsonify({"error": "No payload data received"}), 400
             
         conversation_history = data.get('messages', [])
-        if not conversation_history or len(conversation_history) == 0:
-            return jsonify({"error": "Conversation history cannot be empty"}), 400
-        
-        latest_user_message = conversation_history[-1].get('content', '').strip()
-        if not latest_user_message:
-            return jsonify({"error": "Message text space cannot be blank"}), 400
-        
-        groq_api_key = os.getenv("GROQ_API_KEY")
-        if not groq_api_key:
-            return jsonify({"error": "Groq API key configuration missing"}), 500
+        if not conversation_history:
+            return jsonify({"error": "No message history found"}), 400
 
+        groq_api_key = os.getenv("GROQ_API_KEY")
         current_time_str = datetime.now().strftime("%A, %B %d, %Y")
 
-        url = "https://groq.com"
+        # Official Groq Endpoint
+        url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {groq_api_key}",
             "Content-Type": "application/json"
         }
         
-        # 🤖 Change your assistant's name right here!
-        ai_name = "Pleasure" 
+        ai_name = "Nova" 
         
         system_prompt = {
             "role": "system", 
-            "content": f"Your name is {ai_name}. You are an advanced portfolio AI assistant built by an exceptional developer. "
-                       f"Today's exact date is {current_time_str}. You are fully up-to-date with current world events. "
-                       f"Keep responses punchy, concise, and friendly."
+            "content": f"Your name is {ai_name}. You are an advanced, helpful portfolio AI assistant. "
+                       f"Today's date is {current_time_str}. Maintain strict continuity!"
         }
 
-        full_payload_messages = [system_prompt] + conversation_history
+        payload_messages = [system_prompt]
+        for msg in conversation_history:
+            payload_messages.append({
+                "role": msg.get("role"),
+                "content": msg.get("content")
+            })
 
         payload = {
-            "model": "qwen-2.5-32b", # 🚀 FIXED: The exact, strict model ID string accepted by Groq
-            "messages": full_payload_messages,
-            "temperature": 0.6
+            "model": "qwen-2.5-32b",
+            "messages": payload_messages,
+            "temperature": 0.5
         }
 
+        # Fire connection request cleanly as a POST
         response = requests.post(url, headers=headers, json=payload, timeout=10)
         
         try:
             response_data = response.json()
         except Exception:
             return jsonify({
-                "error": f"Groq engine returned a non-JSON format structure. Status: {response.status_code}. Content: {response.text[:80]}"
+                "error": f"Groq engine returned non-JSON format. Status: {response.status_code}. Content: {response.text[:80]}"
             }), 500
 
         if response.status_code == 200:
             ai_reply = response_data['choices']['message']['content']
             return jsonify({"reply": ai_reply}), 200
         else:
-            error_msg = response_data.get('error', {}).get('message', 'Unknown communication failure')
-            return jsonify({"error": f"Groq Error ({response.status_code}): {error_msg}"}), response.status_code
+            return jsonify({"error": response_data.get('error', {}).get('message', 'Communication failure')}), response.status_code
 
     except Exception as e:
-        return jsonify({"error": f"Internal Application Exception Error: {str(e)}"}), 500
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     # Render passes an environment variable called 'PORT'. We read it natively.
