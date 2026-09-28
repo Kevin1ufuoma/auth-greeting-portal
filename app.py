@@ -118,12 +118,10 @@ def chat_with_ai():
         if not data:
             return jsonify({"error": "No payload data received"}), 400
             
-       # Capture the whole conversation array from the frontend
         conversation_history = data.get('messages', [])
         if not conversation_history or len(conversation_history) == 0:
             return jsonify({"error": "Conversation history cannot be empty"}), 400
         
-        # Validate that the latest incoming user message actually contains text
         latest_user_message = conversation_history[-1].get('content', '').strip()
         if not latest_user_message:
             return jsonify({"error": "Message text space cannot be blank"}), 400
@@ -140,21 +138,20 @@ def chat_with_ai():
             "Content-Type": "application/json"
         }
         
+        # 🤖 Change your assistant's name right here!
         ai_name = "Pleasure" 
         
-        # Build system instructions to force its name, date awareness, and current world context
         system_prompt = {
             "role": "system", 
-            "content": f"Your name is {ai_name}. You are an advanced, polite portfolio AI assistant built by an exceptional developer. "
+            "content": f"Your name is {ai_name}. You are an advanced portfolio AI assistant built by an exceptional developer. "
                        f"Today's exact date is {current_time_str}. You are fully up-to-date with current world events. "
                        f"Keep responses punchy, concise, and friendly."
         }
 
-        # Combine system prompt with the full incoming chat history for continuity
         full_payload_messages = [system_prompt] + conversation_history
 
         payload = {
-            "model": "llama-3.3-70b-specdec", # Highly up-to-date flagship model on Groq
+            "model": "qwen-2.5-32b", # 🚀 FIXED: The exact, strict model ID string accepted by Groq
             "messages": full_payload_messages,
             "temperature": 0.6
         }
@@ -164,14 +161,16 @@ def chat_with_ai():
         try:
             response_data = response.json()
         except Exception:
-            return jsonify({"error": "Groq engine returned a non-JSON format structure."}), 500
+            return jsonify({
+                "error": f"Groq engine returned a non-JSON format structure. Status: {response.status_code}. Content: {response.text[:80]}"
+            }), 500
 
         if response.status_code == 200:
             ai_reply = response_data['choices']['message']['content']
             return jsonify({"reply": ai_reply}), 200
         else:
             error_msg = response_data.get('error', {}).get('message', 'Unknown communication failure')
-            return jsonify({"error": f"Groq Error: {error_msg}"}), response.status_code
+            return jsonify({"error": f"Groq Error ({response.status_code}): {error_msg}"}), response.status_code
 
     except Exception as e:
         return jsonify({"error": f"Internal Application Exception Error: {str(e)}"}), 500
