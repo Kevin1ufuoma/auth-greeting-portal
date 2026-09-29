@@ -138,7 +138,7 @@ def chat_with_ai():
         
         # Using a reliable, stable Qwen identifier on Groq's platform
         payload = {
-            "model": "qwen-2.5-32b", 
+            "model": "qwen/qwen3.8-27b", 
             "messages": [
                 {
                     "role": "system", 
