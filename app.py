@@ -123,58 +123,51 @@ def chat_with_ai():
         if not user_message:
             return jsonify({"error": "Message text space cannot be blank"}), 400
         
-        # Pull your hidden Groq API key safely from your local .env file
         groq_api_key = os.getenv("GROQ_API_KEY")
         if not groq_api_key:
             return jsonify({"error": "Groq API key configuration missing"}), 500
 
-        # 1. Fetch the exact current live date from your server machine
         current_time_str = datetime.now().strftime("%A, %B %d, %Y")
 
-        # Groq API endpoint
+        # Official Groq Endpoint
         url = "https://groq.com"
         headers = {
             "Authorization": f"Bearer {groq_api_key}",
             "Content-Type": "application/json"
         }
-
-        ai_name = "Pleasure"
         
-        contextualized_user_message = f"[System Context Notice: Today's current date is definitively {current_time_str}]\nUser asks: {user_message}"
-
+        # Build payload matching the stable single-message front-end configuration
         payload = {
-            "model": "qwen/qwen3.8-27b", # Target the official active Groq ID model cleanly
+            "model": "llama-3.3-70b-versatile", # 🚀 FIXED: The exact, active model ID string accepted by Groq
             "messages": [
                 {
                     "role": "system", 
-                    "content": f"your name is {ai_name}. You are a professional portfolio AI assistant. Keep answers brief and friendly."
+                    "content": f"You are a professional, polite portfolio AI assistant named Nova. Today's current date is {current_time_str}. Keep responses punchy, concise, and friendly."
                 },
-                {
-                    "role": "user", 
-                    "content": contextualized_user_message
-                }
+                {"role": "user", "content": user_message}
             ],
-            "temperature": 0.5
+            "temperature": 0.7
         }
 
-        # Fire connection request cleanly
+        # Send request cleanly via POST
         response = requests.post(url, headers=headers, json=payload, timeout=10)
         
         try:
             response_data = response.json()
         except Exception:
-            return jsonify({"error": "Groq engine returned a non-JSON format structure."}), 500
+            return jsonify({
+                "error": f"Groq engine returned a non-JSON format structure. Status: {response.status_code}. Content: {response.text[:80]}"
+            }), 500
 
         if response.status_code == 200:
             ai_reply = response_data['choices']['message']['content']
             return jsonify({"reply": ai_reply}), 200
         else:
             error_msg = response_data.get('error', {}).get('message', 'Unknown communication failure')
-            return jsonify({"error": f"Groq Error: {error_msg}"}), response.status_code
+            return jsonify({"error": f"Groq Error ({response.status_code}): {error_msg}"}), response.status_code
 
     except Exception as e:
         return jsonify({"error": f"Internal Application Exception Error: {str(e)}"}), 500
-
 
 
 if __name__ == '__main__':
