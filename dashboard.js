@@ -139,7 +139,7 @@ async function loadCommentHistory() {
 }
 
 // ==========================================
-// 7. CHATBOX CONTROLLER LOGIC (STABLE BACKUP RESTORED)
+// 7. CHATBOX CONTROLLER LOGIC (RESTORED TO ORIGINAL WORKING STATE)
 // ==========================================
 const chatInput = document.getElementById('chat-input');
 const chatSendBtn = document.getElementById('chat-send-btn');
@@ -149,12 +149,12 @@ async function sendChatMessage() {
     const message = chatInput.value.trim();
     if (!message) return; 
 
-    // Append the User's typed message into the window
+    // Append the User's typed message directly to the UI screen window
     chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #fff;"><strong>You:</strong> ${message}</div>`;
     chatInput.value = ''; 
     chatBox.scrollTop = chatBox.scrollHeight; 
 
-    // Placeholder loading text
+    // Visual placeholder indicator
     const loadingId = 'ai-loading-' + Date.now();
     chatBox.innerHTML += `<div id="${loadingId}" style="margin-bottom: 10px; color: #94a3b8; font-style: italic;">AI is thinking...</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -163,14 +163,14 @@ async function sendChatMessage() {
         const response = await fetch(`${BACKEND_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message }) // Fixed: Sends message string
+            body: JSON.stringify({ message: message }) // RESTORED: Sends a clean single text key
         });
         const data = await response.json();
 
         document.getElementById(loadingId).remove();
 
         if (response.ok) {
-            chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #60a5fa;"><strong>Pleasure:</strong> ${data.reply}</div>`;
+            chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #60a5fa;"><strong>Qwen AI:</strong> ${data.reply}</div>`;
         } else {
             chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #ef4444;"><strong>Error:</strong> ${data.error}</div>`;
         }
@@ -187,4 +187,3 @@ chatInput.addEventListener('keypress', (e) => {
         sendChatMessage();
     }
 });
-

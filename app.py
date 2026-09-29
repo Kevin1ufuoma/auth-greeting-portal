@@ -119,6 +119,7 @@ def chat_with_ai():
         if not data:
             return jsonify({"error": "No payload data received"}), 400
             
+        # Restore the exact single text string parameter that worked natively
         user_message = data.get('message')
         if not user_message:
             return jsonify({"error": "Message text space cannot be blank"}), 400
@@ -129,34 +130,33 @@ def chat_with_ai():
 
         current_time_str = datetime.now().strftime("%A, %B %d, %Y")
 
-        # Official Groq Endpoint
         url = "https://groq.com"
         headers = {
             "Authorization": f"Bearer {groq_api_key}",
             "Content-Type": "application/json"
         }
         
-        # Build payload matching the stable single-message front-end configuration
+        # RESTORED: Exactly your working model parameter choice
         payload = {
-            "model": "llama-3.3-70b-versatile", # 🚀 FIXED: The exact, active model ID string accepted by Groq
+            "model": "qwen/qwen3.8-27b", 
             "messages": [
                 {
                     "role": "system", 
-                    "content": f"You are a professional, polite portfolio AI assistant named Nova. Today's current date is {current_time_str}. Keep responses punchy, concise, and friendly."
+                    "content": f"You are a professional, polite portfolio AI assistant named Qwen. Today's current date is {current_time_str}. Keep responses punchy, concise, and friendly."
                 },
                 {"role": "user", "content": user_message}
             ],
             "temperature": 0.7
         }
 
-        # Send request cleanly via POST
+        # Enforce standard POST communications to eliminate the 405 error code
         response = requests.post(url, headers=headers, json=payload, timeout=10)
         
         try:
             response_data = response.json()
         except Exception:
             return jsonify({
-                "error": f"Groq engine returned a non-JSON format structure. Status: {response.status_code}. Content: {response.text[:80]}"
+                "error": f"Groq engine returned a non-JSON format structure. Status: {response.status_code}. Content: {response.text[:60]}"
             }), 500
 
         if response.status_code == 200:
