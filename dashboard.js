@@ -139,7 +139,7 @@ async function loadCommentHistory() {
 }
 
 // ==========================================
-// 7. CHATBOX CONTROLLER LOGIC (RESTORED TO ORIGINAL WORKING STATE)
+// 7. CHATBOX CONTROLLER LOGIC (STABLE RESTORATION)
 // ==========================================
 const chatInput = document.getElementById('chat-input');
 const chatSendBtn = document.getElementById('chat-send-btn');
@@ -149,12 +149,12 @@ async function sendChatMessage() {
     const message = chatInput.value.trim();
     if (!message) return; 
 
-    // Append the User's typed message directly to the UI screen window
+    // Render User message instantly
     chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #fff;"><strong>You:</strong> ${message}</div>`;
     chatInput.value = ''; 
     chatBox.scrollTop = chatBox.scrollHeight; 
 
-    // Visual placeholder indicator
+    // Render loading feedback placeholder
     const loadingId = 'ai-loading-' + Date.now();
     chatBox.innerHTML += `<div id="${loadingId}" style="margin-bottom: 10px; color: #94a3b8; font-style: italic;">AI is thinking...</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -163,7 +163,7 @@ async function sendChatMessage() {
         const response = await fetch(`${BACKEND_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: message }) // RESTORED: Sends a clean single text key
+            body: JSON.stringify({ message: message }) // Sends a clean single text key string
         });
         const data = await response.json();
 
@@ -187,3 +187,4 @@ chatInput.addEventListener('keypress', (e) => {
         sendChatMessage();
     }
 });
+

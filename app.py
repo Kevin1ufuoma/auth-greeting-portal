@@ -112,14 +112,14 @@ def get_feedback():
 import requests # Make sure 'import requests' is added at the top of your app.py file
 
 
-@app.route('/api/chat', methods=['POST'])
+# strict_slashes=False completely stops Render from redirecting POST to GET
+@app.route('/api/chat', methods=['POST'], strict_slashes=False)
 def chat_with_ai():
     try:
         data = request.json
         if not data:
             return jsonify({"error": "No payload data received"}), 400
             
-        # Restore the exact single text string parameter that worked natively
         user_message = data.get('message')
         if not user_message:
             return jsonify({"error": "Message text space cannot be blank"}), 400
@@ -130,15 +130,15 @@ def chat_with_ai():
 
         current_time_str = datetime.now().strftime("%A, %B %d, %Y")
 
-        url = "https://groq.com"
+        url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {groq_api_key}",
             "Content-Type": "application/json"
         }
         
-        # RESTORED: Exactly your working model parameter choice
+        # Using a reliable, stable Qwen identifier on Groq's platform
         payload = {
-            "model": "qwen/qwen3.8-27b", 
+            "model": "qwen-2.5-32b", 
             "messages": [
                 {
                     "role": "system", 
@@ -149,7 +149,7 @@ def chat_with_ai():
             "temperature": 0.7
         }
 
-        # Enforce standard POST communications to eliminate the 405 error code
+        # Clear POST method to Groq
         response = requests.post(url, headers=headers, json=payload, timeout=10)
         
         try:
@@ -168,7 +168,6 @@ def chat_with_ai():
 
     except Exception as e:
         return jsonify({"error": f"Internal Application Exception Error: {str(e)}"}), 500
-
 
 if __name__ == '__main__':
     # Render passes an environment variable called 'PORT'. We read it natively.
