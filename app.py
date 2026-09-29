@@ -111,67 +111,66 @@ def get_feedback():
 
 import requests # Make sure 'import requests' is added at the top of your app.py file
 
-# 🚀 FIX: Add strict_slashes=False so both /api/chat and /api/chat/ work perfectly
-@app.route('/api/chat', methods=['POST'], strict_slashes=False)
+
+@app.route('/api/chat', methods=['POST'])
 def chat_with_ai():
     try:
         data = request.json
         if not data:
             return jsonify({"error": "No payload data received"}), 400
             
-        conversation_history = data.get('messages', [])
-        if not conversation_history:
-            return jsonify({"error": "No message history found"}), 400
-
+        user_message = data.get('message')
+        if not user_message:
+            return jsonify({"error": "Message text space cannot be blank"}), 400
+        
+        # Pull your hidden Groq API key safely from your local .env file
         groq_api_key = os.getenv("GROQ_API_KEY")
+        if not groq_api_key:
+            return jsonify({"error": "Groq API key configuration missing"}), 500
+
+        # Fetch the exact current live date from your server machine
         current_time_str = datetime.now().strftime("%A, %B %d, %Y")
 
-        # Official Groq Endpoint
-        url = "https://api.groq.com/openai/v1/chat/completions"
+        url = "https://groq.com"
         headers = {
             "Authorization": f"Bearer {groq_api_key}",
             "Content-Type": "application/json"
         }
-        
-        ai_name = "Nova" 
-        
-        system_prompt = {
-            "role": "system", 
-            "content": f"Your name is {ai_name}. You are an advanced, helpful portfolio AI assistant. "
-                       f"Today's date is {current_time_str}. Maintain strict continuity!"
-        }
 
-        payload_messages = [system_prompt]
-        for msg in conversation_history:
-            payload_messages.append({
-                "role": msg.get("role"),
-                "content": msg.get("content")
-            })
-
+        ai_name = "Pleasure"
+        
+        # Use the highly stable, fast qwen model string
         payload = {
-            "model": "qwen-2.5-32b",
-            "messages": payload_messages,
-            "temperature": 0.5
+            "model": "qwen-2.5-32b", 
+            "messages": [
+                {
+                    "role": "system", 
+                    "content": f"Your name is {ai_name}. You are a professional, polite portfolio AI assistant. Today's current date is {current_time_str}. Keep responses punchy, concise, and friendly."
+                },
+                {"role": "user", "content": user_message}
+            ],
+            "temperature": 0.7
         }
 
-        # Fire connection request cleanly as a POST
         response = requests.post(url, headers=headers, json=payload, timeout=10)
         
         try:
             response_data = response.json()
         except Exception:
-            return jsonify({
-                "error": f"Groq engine returned non-JSON format. Status: {response.status_code}. Content: {response.text[:80]}"
-            }), 500
+            return jsonify({"error": "Groq engine returned a non-JSON format structure."}), 500
 
         if response.status_code == 200:
             ai_reply = response_data['choices']['message']['content']
             return jsonify({"reply": ai_reply}), 200
         else:
-            return jsonify({"error": response_data.get('error', {}).get('message', 'Communication failure')}), response.status_code
+            error_msg = response_data.get('error', {}).get('message', 'Unknown communication failure')
+            return jsonify({"error": f"Groq Error ({response.status_code}): {error_msg}"}), response.status_code
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Internal Application Exception Error: {str(e)}"}), 500
+
+
+
 
 if __name__ == '__main__':
     # Render passes an environment variable called 'PORT'. We read it natively.

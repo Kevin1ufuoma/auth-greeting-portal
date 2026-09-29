@@ -139,59 +139,57 @@ async function loadCommentHistory() {
 }
 
 // ==========================================
-// 7. CHATBOX CONTROLLER LOGIC (WITH CONTINUITY)
+// 7. CHATBOX CONTROLLER LOGIC (REVERTED TO WORKING SINGLE-MESSAGE)
 // ==========================================
 const chatInput = document.getElementById('chat-input');
 const chatSendBtn = document.getElementById('chat-send-btn');
 const chatBox = document.getElementById('chat-box');
 
-const AI_VISUAL_NAME = "Nova AI"; 
-let chatMemory = []; // Make sure this sits OUTSIDE your function at the top of the chat area
-
 async function sendChatMessage() {
-    const userText = chatInput.value.trim();
-    if (!userText) return; 
+    const message = chatInput.value.trim();
+    if (!message) return; // Ignore blank spaces
 
-    // 1. Display user text on screen
-    chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #fff;"><strong>You:</strong> ${userText}</div>`;
-    chatInput.value = ''; 
-    chatBox.scrollTop = chatBox.scrollHeight; 
+    // Append the User's typed comment message into the UI window
+    chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #fff;"><strong>You:</strong> ${message}</div>`;
+    chatInput.value = ''; // Reset input area
+    chatBox.scrollTop = chatBox.scrollHeight; // Scroll view to the bottom instantly
 
-    // 2. Save USER input to history array
-    chatMemory.push({ role: "user", content: userText });
-
+    // Placeholder loading text framework indicator
     const loadingId = 'ai-loading-' + Date.now();
-    chatBox.innerHTML += `<div id="${loadingId}" style="margin-bottom: 10px; color: #94a3b8; font-style: italic;">${AI_VISUAL_NAME} is typing...</div>`;
+    chatBox.innerHTML += `<div id="${loadingId}" style="margin-bottom: 10px; color: #94a3b8; font-style: italic;">AI is thinking...</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        // Ensure there is a clean slash before api/chat
-const response = await fetch(`${BACKEND_URL}/api/chat`, {
-    method: 'POST', // Make sure this is 100% capitalized POST string
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages: chatMemory })
-});
-
+        const response = await fetch(`${BACKEND_URL}/api/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message }) // Send single string, not an array
+        });
         const data = await response.json();
 
+        // Clear out loading text line marker block
         document.getElementById(loadingId).remove();
 
         if (response.ok) {
-            // 3. Save ASSISTANT response to history array so it knows next time!
-            chatMemory.push({ role: "assistant", content: data.reply });
-            
-            chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #60a5fa;"><strong>${AI_VISUAL_NAME}:</strong> ${data.reply}</div>`;
+            // Append clean, interactive AI agent return answer
+            chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #60a5fa;"><strong>Pleasure:</strong> ${data.reply}</div>`;
         } else {
             chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #ef4444;"><strong>Error:</strong> ${data.error}</div>`;
         }
     } catch (error) {
         document.getElementById(loadingId).remove();
-        chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #ef4444;"><strong>Error:</strong> Connection dropped.</div>`;
+        chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #ef4444;"><strong>Error:</strong> Cannot link to AI engine right now.</div>`;
     }
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+// Trigger text shipping actions via physical mouse click hooks
 chatSendBtn.addEventListener('click', sendChatMessage);
+
+// Trigger text shipping actions seamlessly via physical keyboard 'Enter' press events
 chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendChatMessage();
+    if (e.key === 'Enter') {
+        sendChatMessage();
+    }
 });
+
