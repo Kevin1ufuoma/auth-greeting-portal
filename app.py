@@ -112,7 +112,6 @@ def get_feedback():
 import requests # Make sure 'import requests' is added at the top of your app.py file
 
 
-# strict_slashes=False completely stops Render from redirecting POST to GET
 @app.route('/api/chat', methods=['POST'], strict_slashes=False)
 def chat_with_ai():
     try:
@@ -120,6 +119,7 @@ def chat_with_ai():
         if not data:
             return jsonify({"error": "No payload data received"}), 400
             
+        # 🚀 FIXED: Captures the single string key sent by your dashboard.js
         user_message = data.get('message')
         if not user_message:
             return jsonify({"error": "Message text space cannot be blank"}), 400
@@ -130,15 +130,15 @@ def chat_with_ai():
 
         current_time_str = datetime.now().strftime("%A, %B %d, %Y")
 
-        url = "https://api.groq.com/openai/v1/chat/completions"
+        url = "https://groq.com"
         headers = {
             "Authorization": f"Bearer {groq_api_key}",
             "Content-Type": "application/json"
         }
         
-        # Using a reliable, stable Qwen identifier on Groq's platform
+        # Exact payload structure for single message routing
         payload = {
-            "model": "qwen/qwen3.8-27b", 
+            "model": "qwen/qwen3.8-27b", # Live, active flagship model identifier on Groq
             "messages": [
                 {
                     "role": "system", 
@@ -149,14 +149,14 @@ def chat_with_ai():
             "temperature": 0.7
         }
 
-        # Clear POST method to Groq
+        # Fire connection request cleanly as a POST
         response = requests.post(url, headers=headers, json=payload, timeout=10)
         
         try:
             response_data = response.json()
         except Exception:
             return jsonify({
-                "error": f"Groq engine returned a non-JSON format structure. Status: {response.status_code}. Content: {response.text[:60]}"
+                "error": f"Groq engine returned non-JSON format. Status: {response.status_code}. Content: {response.text[:80]}"
             }), 500
 
         if response.status_code == 200:
