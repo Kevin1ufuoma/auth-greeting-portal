@@ -139,7 +139,7 @@ async function loadCommentHistory() {
 }
 
 // ==========================================
-// 7. CHATBOX CONTROLLER LOGIC (REVERTED TO WORKING SINGLE-MESSAGE)
+// 7. CHATBOX CONTROLLER LOGIC (STABLE BACKUP RESTORED)
 // ==========================================
 const chatInput = document.getElementById('chat-input');
 const chatSendBtn = document.getElementById('chat-send-btn');
@@ -147,14 +147,14 @@ const chatBox = document.getElementById('chat-box');
 
 async function sendChatMessage() {
     const message = chatInput.value.trim();
-    if (!message) return; // Ignore blank spaces
+    if (!message) return; 
 
-    // Append the User's typed comment message into the UI window
+    // Append the User's typed message into the window
     chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #fff;"><strong>You:</strong> ${message}</div>`;
-    chatInput.value = ''; // Reset input area
-    chatBox.scrollTop = chatBox.scrollHeight; // Scroll view to the bottom instantly
+    chatInput.value = ''; 
+    chatBox.scrollTop = chatBox.scrollHeight; 
 
-    // Placeholder loading text framework indicator
+    // Placeholder loading text
     const loadingId = 'ai-loading-' + Date.now();
     chatBox.innerHTML += `<div id="${loadingId}" style="margin-bottom: 10px; color: #94a3b8; font-style: italic;">AI is thinking...</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -163,15 +163,13 @@ async function sendChatMessage() {
         const response = await fetch(`${BACKEND_URL}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message }) // Send single string, not an array
+            body: JSON.stringify({ message }) // Fixed: Sends message string
         });
         const data = await response.json();
 
-        // Clear out loading text line marker block
         document.getElementById(loadingId).remove();
 
         if (response.ok) {
-            // Append clean, interactive AI agent return answer
             chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #60a5fa;"><strong>Pleasure:</strong> ${data.reply}</div>`;
         } else {
             chatBox.innerHTML += `<div style="margin-bottom: 10px; color: #ef4444;"><strong>Error:</strong> ${data.error}</div>`;
@@ -183,10 +181,7 @@ async function sendChatMessage() {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Trigger text shipping actions via physical mouse click hooks
 chatSendBtn.addEventListener('click', sendChatMessage);
-
-// Trigger text shipping actions seamlessly via physical keyboard 'Enter' press events
 chatInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         sendChatMessage();

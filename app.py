@@ -123,12 +123,10 @@ def chat_with_ai():
         if not user_message:
             return jsonify({"error": "Message text space cannot be blank"}), 400
         
-        # Pull your hidden Groq API key safely from your local .env file
         groq_api_key = os.getenv("GROQ_API_KEY")
         if not groq_api_key:
             return jsonify({"error": "Groq API key configuration missing"}), 500
 
-        # Fetch the exact current live date from your server machine
         current_time_str = datetime.now().strftime("%A, %B %d, %Y")
 
         url = "https://groq.com"
@@ -139,13 +137,12 @@ def chat_with_ai():
 
         ai_name = "Pleasure"
         
-        # Use the highly stable, fast qwen model string
         payload = {
             "model": "qwen-2.5-32b", 
             "messages": [
                 {
                     "role": "system", 
-                    "content": f"Your name is {ai_name}. You are a professional, polite portfolio AI assistant. Today's current date is {current_time_str}. Keep responses punchy, concise, and friendly."
+                    "content": f"your name is {ai_name}. You are a professional, polite portfolio AI assistant. Today's current date is {current_time_str}. Keep responses punchy, concise, and friendly."
                 },
                 {"role": "user", "content": user_message}
             ],
@@ -168,7 +165,6 @@ def chat_with_ai():
 
     except Exception as e:
         return jsonify({"error": f"Internal Application Exception Error: {str(e)}"}), 500
-
 
 
 
